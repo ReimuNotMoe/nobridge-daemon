@@ -31,13 +31,24 @@ void TriggerMediaLibrary(const std::string &path_absolute) {
 	if (!(strstr(pathc, ".png") || strstr(pathc, ".JPG") || strstr(pathc, ".jpg") || strstr(pathc, ".PNG")))
 		return;
 
-	std::string cmdline = "am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard'";
-	cmdline += pathc;
-	cmdline += "' --user ";
-	cmdline += uid_android;
+//	std::string cmdline = "am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard'";
+//	cmdline += pathc;
+//	cmdline += "' --user ";
+//	cmdline += uid_android;
 
-	fprintf(stderr, "TriggerMediaLibrary: system(\"%s\");\n", cmdline.c_str());
-	system(cmdline.c_str());
+	std::string cmdline = "file:///sdcard";
+	cmdline += pathc;
+
+//	fprintf(stderr, "TriggerMediaLibrary: system(\"%s\");\n", cmdline.c_str());
+
+	auto pid = fork();
+
+	if (pid) {
+		fprintf(stderr, "TriggerMediaLibrary: forked pid %d\n", pid);
+	} else {
+		execl("/system/bin/am", "am", "broadcast", "-a", "android.intent.action.MEDIA_SCANNER_SCAN_FILE", "-d",
+		      cmdline.c_str(), "--user", uid_android, NULL);
+	}
 }
 
 
